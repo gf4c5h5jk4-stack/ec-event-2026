@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>شاشة العرض - قسم هندسة الحاسب الآلي</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      background-color: #F6F8FA;
+      background-image: 
+        linear-gradient(to right, rgba(58, 61, 64, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(58, 61, 64, 0.04) 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: #3A3D40;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-4 md:p-6 select-none overflow-y-auto">
+
+  <header class="bg-white border border-[#DEE2E6] px-5 py-3 rounded shadow-sm flex flex-col sm:flex-row justify-between items-center gap-3">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" onerror="this.src='logo.jpg'; this.onerror=null;" alt="شعار القسم" class="h-11 w-auto object-contain">
+      <div>
+        <span class="text-[11px] font-semibold text-[#3CB8D9] block">جامعة طرابلس · كلية الهندسة</span>
+        <h1 class="text-base font-bold text-[#24272A]">قسم هندسة الحاسب الآلي · ملتقى الطلبة الجدد</h1>
+      </div>
+    </div>
+    
+    <div class="flex gap-5 bg-[#F6F8FA] border border-[#DEE2E6] px-4 py-1.5 rounded text-right">
+      <div>
+        <span class="block text-[10px] text-[#61676E]">إجمالي المسجلين</span>
+        <span id="statParticipants" class="text-base font-bold text-[#3CB8D9] font-mono">0</span>
+      </div>
+      <div class="w-[1px] bg-[#DEE2E6]"></div>
+      <div>
+        <span class="block text-[10px] text-[#61676E]">مجموع النقاط</span>
+        <span id="statTotalScore" class="text-base font-bold text-[#24272A] font-mono">0</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-1 flex items-center justify-center py-6 w-full">
+
+    <div id="welcomeView" style="display: flex;" class="flex-col md:flex-row items-center gap-8 md:gap-12 max-w-5xl w-full mx-auto bg-white border border-[#DEE2E6] p-6 md:p-10 rounded shadow-sm">
+      <div class="space-y-4 flex-1 text-right">
+        <span class="inline-block bg-[#F6F8FA] text-[#3CB8D9] border border-[#DEE2E6] px-3 py-1 rounded text-xs font-bold">
+          الخطوة الأولى للتفاعل
+        </span>
+        <h2 class="text-2xl md:text-3xl font-bold text-[#24272A] leading-snug">امسح الرمز للتسجيل وتأكيد حضورك</h2>
+        <p class="text-xs md:text-sm text-[#61676E] leading-relaxed">
+          وجّه كاميرا هاتفك نحو رمز الاستجابة السريعة (QR) لتسجيل بياناتك الأكاديمية مرة واحدة. سيتم إصدار معرف خاص بك لاستخدامه طوال فقرات الملتقى.
+        </p>
+      </div>
+      <div class="bg-white p-4 rounded border border-[#DEE2E6] flex flex-col items-center shadow-sm shrink-0">
+        <div id="welcomeQRCode"></div>
+        <span class="text-[11px] text-[#61676E] font-mono font-semibold mt-3">SCAN TO REGISTER</span>
+      </div>
+    </div>
+
+    <div id="questionView" style="display: none;" class="w-full max-w-5xl bg-white border border-[#DEE2E6] p-6 md:p-8 rounded shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 items-center">
+      <div class="w-full md:col-span-2 space-y-4 text-right">
+        <div class="flex items-center justify-between border-b border-[#DEE2E6] pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="bg-[#3A3D40] text-white px-3 py-1 rounded text-xs font-bold">سؤال تفاعلي مباشر</span>
+            <span id="dispQTimer" class="text-xs font-mono font-bold text-[#3A3D40] bg-[#F6F8FA] border border-[#DEE2E6] px-2.5 py-0.5 rounded">30s</span>
+          </div>
+          <span class="text-xs md:text-sm font-bold text-[#3CB8D9]">+1 نقطة إضافية</span>
+        </div>
+        <h2 id="dispQuestionText" class="text-xl md:text-2xl font-bold text-[#24272A] leading-relaxed">...</h2>
+        <div id="dispOptionsList" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2"></div>
+      </div>
+      <div class="w-full flex flex-col items-center justify-center bg-[#F6F8FA] border border-[#DEE2E6] p-5 rounded">
+        <div class="bg-white p-2.5 rounded border border-[#DEE2E6]">
+          <div id="questionQRCode"></div>
+        </div>
+        <span class="text-[#3A3D40] font-bold text-xs mt-2.5">امسح للإجابة من هاتفك</span>
+      </div>
+    </div>
+
+    <div id="bonusView" style="display: none;" class="flex flex-col items-center text-center space-y-4 bg-white border border-[#DEE2E6] p-6 md:p-10 rounded shadow-sm max-w-3xl w-full mx-auto">
+      <span class="bg-[#3CB8D9] text-white px-4 py-1 rounded text-xs font-bold">رمز السرعة التفاعلي</span>
+      <h2 class="text-2xl md:text-3xl font-bold text-[#24272A]">امسح الرمز قبل انتهاء الفترة الزمنية</h2>
+      <div class="flex flex-col sm:flex-row items-center gap-6 md:gap-10 my-2">
+        <div class="bg-white p-3.5 rounded border border-[#DEE2E6]">
+          <div id="bonusQRCode"></div>
+        </div>
+        <div class="text-center sm:text-right space-y-2">
+          <div class="text-5xl md:text-6xl font-bold font-mono text-[#3CB8D9]" id="bonusTimerDisplay">20s</div>
+          <div class="bg-[#F6F8FA] border border-[#DEE2E6] px-4 py-2 rounded">
+            <span class="text-[10px] text-[#61676E] block font-medium">الرمز اليدوي البديل:</span>
+            <span id="bonusCodeText" class="text-xl md:text-2xl font-bold text-[#24272A] font-mono tracking-wider">---</span>
+          </div>
+        </div>
+      </div>
+      <p class="text-xs text-[#61676E]">يُمنح كل مشارك مسحاً واحداً معتمداً بنقطة إضافية في السجل.</p>
+    </div>
+
+    <div id="raffleView" style="display: none;" class="flex flex-col items-center text-center space-y-5 max-w-4xl w-full mx-auto bg-white border border-[#DEE2E6] p-6 md:p-10 rounded shadow-sm">
+      <span class="bg-[#3A3D40] text-white px-4 py-1 rounded text-xs font-bold">السحب الأكاديمي الختامي</span>
+      <h2 class="text-2xl md:text-3xl font-bold text-[#24272A]">إعلان نتائج القرعة الإلكترونية الموزونة</h2>
+      <p class="text-xs text-[#61676E] max-w-md">تم إجراء السحب آلياً بنظام الأوزان النسبية وفقاً لعدد نقاط التفاعل المجمعة طوال الملتقى.</p>
+      <div class="w-full bg-[#F6F8FA] border border-[#DEE2E6] p-5 rounded">
+        <div id="raffleBox" class="space-y-3">
+          <div id="raffleCandidateName" class="text-2xl md:text-3xl font-bold text-[#24272A]">في انتظار اعتماد المشرف...</div>
+          <div id="raffleCandidateCode" class="text-xs md:text-sm font-mono text-[#61676E]">---</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="bg-white border border-[#DEE2E6] px-4 py-2.5 rounded flex flex-col sm:flex-row justify-between items-center gap-1 text-xs text-[#61676E] mt-auto">
+    <div>جامعة طرابلس · كلية الهندسة · قسم هندسة الحاسب الآلي</div>
+    <div class="text-[10px] text-[#8C939A]">Computer Engineering Department · Tripoli</div>
+  </footer>
+
+  <script>
+    const studentAppUrl = window.location.origin + '/';
+    const qrSize = window.innerWidth < 640 ? 140 : 170;
+
+    new QRCode(document.getElementById("welcomeQRCode"), { text: studentAppUrl, width: qrSize, height: qrSize });
+    new QRCode(document.getElementById("questionQRCode"), { text: studentAppUrl, width: 140, height: 140 });
+
+    function hideAllViews() {
+      ['welcomeView', 'questionView', 'bonusView', 'raffleView'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+    }
+
+    let timerInterval = null;
+    let questionTimerInterval = null;
+    let lastRenderedQuestionId = null;
+
+    async function syncDisplay() {
+      try {
+        const res = await fetch('/api?action=get_display_data');
+        const data = await res.json();
+        const state = data.state || { current_mode: 'WELCOME' };
+
+        document.getElementById('statParticipants').innerText = data.statParticipants || 0;
+        document.getElementById('statTotalScore').innerText = data.statTotalScore || 0;
+
+        if (state.current_mode === 'QUESTION' && state.active_question_id) {
+          if (Date.now() >= (state.question_expires_at || 0)) {
+            hideAllViews();
+            document.getElementById('welcomeView').style.display = 'flex';
+          } else {
+            showQuestionView(state);
+          }
+        } else if (state.current_mode === 'FLASH_BONUS') {
+          showBonusView(state);
+        } else if (state.current_mode === 'RAFFLE') {
+          showRaffleView(state);
+        } else {
+          hideAllViews();
+          document.getElementById('welcomeView').style.display = 'flex';
+        }
+      } catch (e) {}
+    }
+
+    setInterval(syncDisplay, 1500);
+    syncDisplay();
+
+    async function showQuestionView(state) {
+      if (lastRenderedQuestionId === state.active_question_id) return;
+      lastRenderedQuestionId = state.active_question_id;
+
+      hideAllViews();
+      const qRes = await fetch(`/api?action=get_question&id=${state.active_question_id}`);
+      if (!qRes.ok) return;
+      const q = await qRes.json();
+
+      document.getElementById('dispQuestionText').innerText = q.text;
+      const list = document.getElementById('dispOptionsList');
+      list.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const item = document.createElement('div');
+        item.className = "bg-[#FAFAFB] border border-[#DEE2E6] p-2.5 rounded text-xs md:text-sm font-semibold text-[#3A3D40] flex items-center gap-2.5";
+        item.innerHTML = `<span class="w-5 h-5 rounded bg-[#F6F8FA] border border-[#DEE2E6] text-[#3CB8D9] flex items-center justify-center text-xs font-mono font-bold shrink-0">${idx+1}</span> <span>${opt}</span>`;
+        list.appendChild(item);
+      });
+
+      document.getElementById('questionView').style.display = 'grid';
+
+      if (questionTimerInterval) clearInterval(questionTimerInterval);
+      const updateQTimer = () => {
+        const remaining = Math.max(0, Math.ceil(((state.question_expires_at || 0) - Date.now()) / 1000));
+        document.getElementById('dispQTimer').innerText = `${remaining}s`;
+        if (remaining <= 0) {
+          clearInterval(questionTimerInterval);
+          hideAllViews();
+          document.getElementById('welcomeView').style.display = 'flex';
+          lastRenderedQuestionId = null;
+        }
+      };
+      updateQTimer();
+      questionTimerInterval = setInterval(updateQTimer, 500);
+    }
+
+    function showBonusView(state) {
+      hideAllViews();
+      document.getElementById('bonusView').style.display = 'flex';
+      document.getElementById('bonusCodeText').innerText = state.active_bonus_id;
+
+      const bonusUrl = `${studentAppUrl}?bonus=${state.active_bonus_id}`;
+      const qrel = document.getElementById("bonusQRCode");
+      qrel.innerHTML = "";
+      new QRCode(qrel, { text: bonusUrl, width: qrSize, height: qrSize });
+
+      if (timerInterval) clearInterval(timerInterval);
+      const updateTimer = () => {
+        const remaining = Math.max(0, Math.ceil(((state.bonus_expires_at || 0) - Date.now()) / 1000));
+        document.getElementById('bonusTimerDisplay').innerText = `${remaining}s`;
+        if (remaining <= 0) {
+          clearInterval(timerInterval);
+          hideAllViews();
+          document.getElementById('welcomeView').style.display = 'flex';
+        }
+      };
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 500);
+    }
+
+    function showRaffleView(state) {
+      hideAllViews();
+      document.getElementById('raffleView').style.display = 'flex';
+      if (state.raffle_winners && state.raffle_winners.length > 0) {
+        let html = '<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-right max-w-xl mx-auto">';
+        state.raffle_winners.forEach((w, idx) => {
+          html += `
+            <div class="bg-[#FAFAFB] border border-[#DEE2E6] p-2.5 rounded flex justify-between items-center">
+              <div>
+                <span class="text-[10px] text-[#61676E] block font-medium">الفائز #${idx + 1}</span>
+                <span class="text-xs md:text-sm font-bold text-[#24272A]">${w.name}</span>
+              </div>
+              <span class="text-xs font-mono font-bold text-[#3CB8D9] bg-white border border-[#DEE2E6] px-2 py-0.5 rounded">#${w.code}</span>
+            </div>
+          `;
+        });
+        html += '</div>';
+        document.getElementById('raffleCandidateName').innerHTML = html;
+        document.getElementById('raffleCandidateCode').innerText = `تم اعتماد نتائج القرعة (${state.raffle_winners.length} فائزين)`;
+      } else {
+        document.getElementById('raffleCandidateName').innerText = 'في انتظار بدء عملية السحب...';
+        document.getElementById('raffleCandidateCode').innerText = 'سيتم عرض الأسماء هنا فور الانتهاء من القرعة الإلكترونية.';
+      }
+    }
+  </script>
+</body>
+</html>

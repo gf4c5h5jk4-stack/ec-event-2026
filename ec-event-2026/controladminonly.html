@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم الإدارية - قسم هندسة الحاسب الآلي</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'IBM Plex Sans Arabic', sans-serif;
+      background-color: #F6F8FA;
+      background-image: 
+        linear-gradient(to right, rgba(58, 61, 64, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(58, 61, 64, 0.04) 1px, transparent 1px);
+      background-size: 20px 20px;
+      color: #3A3D40;
+    }
+    .swal2-popup.lab-modal {
+      background: #FFFFFF !important;
+      border: 1px solid #DEE2E6 !important;
+      border-radius: 4px !important;
+      color: #3A3D40 !important;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
+    }
+    .swal2-title { color: #24272A !important; font-weight: 700 !important; }
+  </style>
+</head>
+<body class="min-h-screen p-4 md:p-6 space-y-6">
+
+  <div class="max-w-6xl mx-auto space-y-6">
+
+    <header class="bg-white border border-[#DEE2E6] p-4 rounded shadow-sm flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3.5">
+        <img src="logo.png" onerror="this.src='logo.jpg'; this.onerror=null;" alt="شعار قسم هندسة الحاسب الآلي" class="h-11 w-auto object-contain">
+        <div>
+          <span class="text-[10px] text-[#3CB8D9] font-semibold block">جامعة طرابلس · كلية الهندسة</span>
+          <h1 class="text-sm md:text-base font-bold text-[#24272A]">قسم هندسة الحاسب الآلي · لوحة التحكم الإدارية</h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="display.html" target="_blank" class="bg-[#F6F8FA] hover:bg-[#E9EDF0] text-[#3A3D40] border border-[#DEE2E6] text-xs font-semibold px-3 py-2 rounded transition">
+          فتح شاشة العرض
+        </a>
+        <button onclick="setMode('WELCOME')" class="bg-[#3CB8D9] hover:bg-[#32A5C4] text-white text-xs font-bold px-3 py-2 rounded transition shadow-sm">
+          إعادة شاشة الـ QR الرئيسية
+        </button>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <!-- 1. الأسئلة -->
+      <div class="bg-white border border-[#DEE2E6] p-4 rounded shadow-sm space-y-3">
+        <div class="flex justify-between items-center border-b border-[#DEE2E6] pb-2">
+          <h2 class="text-xs font-bold text-[#24272A]">إطلاق الأسئلة المباشرة</h2>
+          <span class="text-[10px] bg-[#F6F8FA] border border-[#DEE2E6] text-[#61676E] px-2 py-0.5 rounded font-mono">الفقرة 1</span>
+        </div>
+        <select id="questionSelect" class="w-full bg-[#FAFAFB] border border-[#DEE2E6] rounded p-2 text-xs text-[#24272A] focus:border-[#3CB8D9] focus:outline-none"></select>
+        <button onclick="launchSelectedQuestion()" class="w-full bg-[#3CB8D9] hover:bg-[#32A5C4] text-white font-bold py-2 rounded text-xs transition shadow-sm">
+          إطلاق السؤال على الشاشات
+        </button>
+        <div class="flex gap-2">
+          <button onclick="addNewQuestionPrompt()" class="flex-1 bg-[#F6F8FA] hover:bg-[#E9EDF0] text-[#3A3D40] border border-[#DEE2E6] font-semibold py-1.5 rounded text-xs transition">
+            إضافة سؤال جديد
+          </button>
+          <button onclick="deleteSelectedQuestion()" class="bg-white text-[#A85F43] hover:bg-[#A85F43] hover:text-white border border-[#A85F43] px-3 py-1.5 rounded text-xs font-semibold transition">
+            حذف
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. كود السرعة -->
+      <div class="bg-white border border-[#DEE2E6] p-4 rounded shadow-sm space-y-3">
+        <div class="flex justify-between items-center border-b border-[#DEE2E6] pb-2">
+          <h2 class="text-xs font-bold text-[#24272A]">رمز السرعة التفاعلي</h2>
+          <span class="text-[10px] bg-[#F6F8FA] border border-[#DEE2E6] text-[#61676E] px-2 py-0.5 rounded font-mono">نقاط إضافية</span>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-[#61676E] mb-1">المدة الزمنية للظهور (بالثواني):</label>
+          <input type="number" id="bonusDurationInput" value="25" class="w-full bg-[#FAFAFB] border border-[#DEE2E6] rounded p-1.5 text-xs text-[#24272A] text-center font-bold font-mono">
+        </div>
+        <button onclick="triggerFlashBonus()" class="w-full bg-[#3A3D40] hover:bg-[#24272A] text-white font-bold py-2 rounded text-xs transition shadow-sm">
+          تفعيل ونشر رمز السرعة الآن
+        </button>
+        <p class="text-[10px] text-[#61676E] text-center">يظهر مباشرة على شاشة العرض لجميع الحاضرين</p>
+      </div>
+
+      <!-- 3. السحب الموزون -->
+      <div class="bg-white border border-[#DEE2E6] p-4 rounded shadow-sm space-y-3">
+        <div class="flex justify-between items-center border-b border-[#DEE2E6] pb-2">
+          <h2 class="text-xs font-bold text-[#24272A]">القرعة الأكاديمية الموزونة</h2>
+          <span class="text-[10px] bg-[#F6F8FA] border border-[#DEE2E6] text-[#61676E] px-2 py-0.5 rounded font-mono">الختام</span>
+        </div>
+        <div>
+          <label class="block text-[11px] font-semibold text-[#61676E] mb-1">عدد الفائزين المطلوب سحبهم:</label>
+          <input type="number" id="winnersCountInput" value="3" min="1" max="50" class="w-full bg-[#FAFAFB] border border-[#DEE2E6] rounded p-1.5 text-xs text-[#24272A] font-bold text-center font-mono">
+        </div>
+        <button onclick="prepareRaffleStage()" class="w-full bg-[#F6F8FA] hover:bg-[#E9EDF0] text-[#3A3D40] border border-[#DEE2E6] font-semibold py-1.5 rounded text-xs transition">
+          1. تجهيز شاشة السحب
+        </button>
+        <button onclick="executeWeightedDraw()" class="w-full bg-[#3CB8D9] hover:bg-[#32A5C4] text-white font-bold py-2 rounded text-xs transition shadow-sm">
+          2. تنفيذ القرعة وإعلان النتائج
+        </button>
+      </div>
+    </div>
+
+    <!-- المقاعد الميدانية -->
+    <div class="bg-white border border-[#DEE2E6] p-4 rounded shadow-sm space-y-3">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 border-b border-[#DEE2E6] pb-3">
+        <div>
+          <h2 class="text-xs font-bold text-[#24272A]">بطاقات المقاعد الميدانية (صالحة لمرة واحدة فقط)</h2>
+          <p class="text-[11px] text-[#61676E]">توليد وطباعة بطاقات QR فريدة لتوزيعها على مقاعد القاعة قبل بدء الفعالية.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="flex items-center gap-1.5 bg-[#FAFAFB] border border-[#DEE2E6] px-2.5 py-1 rounded">
+            <span class="text-xs text-[#61676E]">العدد:</span>
+            <input type="number" id="customChairCountInput" value="10" min="1" max="100" class="w-14 bg-white border border-[#DEE2E6] rounded px-1.5 py-0.5 text-xs text-center font-bold text-[#24272A]">
+          </div>
+          <button onclick="generateCustomChairCodes()" class="bg-[#F6F8FA] hover:bg-[#E9EDF0] text-[#3A3D40] border border-[#DEE2E6] px-3 py-1.5 rounded text-xs font-semibold transition">
+            توليد الأكواد
+          </button>
+          <button onclick="printCustomChairQRs()" class="bg-[#3CB8D9] hover:bg-[#32A5C4] text-white font-bold px-3 py-1.5 rounded text-xs transition shadow-sm">
+            طباعة البطاقات للقص
+          </button>
+        </div>
+      </div>
+      <div id="chairsStatusGrid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 pt-1"></div>
+    </div>
+
+    <!-- جدول المشاركين -->
+    <div class="bg-white border border-[#DEE2E6] p-4 rounded shadow-sm space-y-3">
+      <div class="flex flex-wrap justify-between items-center gap-3 border-b border-[#DEE2E6] pb-3">
+        <h2 class="text-xs font-bold text-[#24272A]" id="adminCountText">المشاركون المسجلون: 0</h2>
+        <div class="flex gap-2">
+          <button onclick="resetAllParticipants()" class="bg-white text-[#A85F43] border border-[#A85F43] hover:bg-[#A85F43] hover:text-white px-2.5 py-1 rounded text-xs font-semibold transition">
+            إعادة تعيين السجل
+          </button>
+          <button onclick="exportToCSV()" class="bg-[#3A3D40] text-white hover:bg-[#24272A] px-3 py-1 rounded text-xs font-semibold transition">
+            تصدير البيانات (Excel / CSV)
+          </button>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full text-right text-xs">
+          <thead class="bg-[#F6F8FA] text-[#61676E] border-b border-[#DEE2E6]">
+            <tr>
+              <th class="p-2.5">الكود</th>
+              <th class="p-2.5">الاسم</th>
+              <th class="p-2.5">رقم القيد</th>
+              <th class="p-2.5">التيليجرام</th>
+              <th class="p-2.5 text-center">النقاط</th>
+              <th class="p-2.5 text-center">إجراءات</th>
+            </tr>
+          </thead>
+          <tbody id="participantsTableBody" class="divide-y divide-[#DEE2E6]"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const DarkSwal = Swal.mixin({
+      customClass: {
+        popup: 'lab-modal',
+        confirmButton: 'bg-[#3CB8D9] hover:bg-[#32A5C4] text-white font-bold px-4 py-2 rounded text-xs shadow-sm transition mx-1',
+        cancelButton: 'bg-[#F6F8FA] text-[#3A3D40] border border-[#DEE2E6] font-bold px-4 py-2 rounded text-xs transition mx-1'
+      },
+      buttonsStyling: false
+    });
+
+    let allParticipants = {};
+    let currentChairs = {};
+    let allQuestions = {};
+
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchParticipants();
+      fetchQuestions();
+      fetchChairs();
+      setInterval(fetchParticipants, 2500);
+      setInterval(fetchChairs, 3500);
+    });
+
+    async function fetchParticipants() {
+      try {
+        const res = await fetch('/api?action=get_participants');
+        allParticipants = await res.json();
+        const tbody = document.getElementById('participantsTableBody');
+        tbody.innerHTML = '';
+        const keys = Object.keys(allParticipants);
+        document.getElementById('adminCountText').innerText = `المشاركون المسجلون: ${keys.length}`;
+
+        keys.sort((a,b) => (allParticipants[b].score || 0) - (allParticipants[a].score || 0));
+
+        keys.forEach(k => {
+          const p = allParticipants[k];
+          const tr = document.createElement('tr');
+          tr.className = "hover:bg-[#F6F8FA] transition";
+          tr.innerHTML = `
+            <td class="p-2.5 font-mono font-bold text-[#24272A]">${p.code}</td>
+            <td class="p-2.5 font-semibold text-[#24272A]">${p.name}</td>
+            <td class="p-2.5 font-mono text-[#61676E]">${p.student_id}</td>
+            <td class="p-2.5 font-mono text-[#24272A] dir-ltr text-right">${p.telegram || '-'}</td>
+            <td class="p-2.5 text-center"><span class="bg-[#F6F8FA] border border-[#DEE2E6] text-[#3CB8D9] font-bold px-2 py-0.5 rounded font-mono">${p.score || 0}</span></td>
+            <td class="p-2.5 text-center space-x-1 space-x-reverse">
+              <button onclick="addManualPoint('${p.code}')" class="text-[#3A3D40] bg-[#F6F8FA] hover:bg-[#E9EDF0] border border-[#DEE2E6] px-2 py-0.5 rounded font-semibold text-xs">+1</button>
+              <button onclick="deleteParticipant('${p.code}')" class="text-[#A85F43] hover:bg-[#A85F43] hover:text-white border border-[#A85F43] px-2 py-0.5 rounded font-semibold text-xs transition">حذف</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (e) {}
+    }
+
+    async function fetchChairs() {
+      try {
+        const res = await fetch('/api?action=get_chairs');
+        currentChairs = await res.json();
+        const grid = document.getElementById('chairsStatusGrid');
+        grid.innerHTML = '';
+        const keys = Object.keys(currentChairs);
+        if (keys.length === 0) {
+          grid.innerHTML = '<div class="col-span-full py-3 text-center text-xs text-[#61676E]">لا توجد رموز مقاعد مولدة حالياً.</div>';
+          return;
+        }
+        keys.sort((a,b) => (currentChairs[a].number || 0) - (currentChairs[b].number || 0));
+        keys.forEach(k => {
+          const chair = currentChairs[k];
+          const card = document.createElement('div');
+          card.className = `p-2.5 rounded border text-center space-y-1 ${chair.used ? 'bg-[#F6F8FA] border-[#3CB8D9] text-[#24272A]' : 'bg-white border-[#DEE2E6] text-[#61676E]'}`;
+          card.innerHTML = `
+            <div class="text-[10px] font-bold">بطاقة #${chair.number}</div>
+            <div class="text-xs font-bold font-mono">${chair.used ? 'تم التوثيق' : 'شاغر'}</div>
+            <div class="text-[10px] truncate text-[#61676E]">${chair.used ? (chair.student_name || '#' + chair.claimed_by) : 'في الانتظار'}</div>
+          `;
+          grid.appendChild(card);
+        });
+      } catch (e) {}
+    }
+
+    async function generateCustomChairCodes() {
+      const count = parseInt(document.getElementById('customChairCountInput').value) || 10;
+      const res = await DarkSwal.fire({
+        title: `توليد ${count} بطاقة مقعد جديدة؟`,
+        text: 'سيتم استبدال البطاقات الحالية وتوليد أرقام جديدة في Turso.',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'تأكيد التوليد',
+        cancelButtonText: 'إلغاء'
+      });
+
+      if (res.isConfirmed) {
+        await fetch('/api?action=generate_chairs', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ count })
+        });
+        fetchChairs();
+        DarkSwal.fire('اكتمل التوليد', `تم إنشاء ${count} بطاقة بنجاح.`, 'success');
+      }
+    }
+
+    async function printCustomChairQRs() {
+      const keys = Object.keys(currentChairs || {});
+      if (keys.length === 0) return DarkSwal.fire('تنبيه', 'يرجى توليد البطاقات أولاً', 'warning');
+
+      keys.sort((a,b) => (currentChairs[a].number || 0) - (currentChairs[b].number || 0));
+      const siteBase = window.location.origin + '/';
+      const printWindow = window.open('', '_blank');
+
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html lang="ar" dir="rtl">
+        <head>
+          <meta charset="UTF-8">
+          <title>بطاقات المقاعد الميدانية - قسم هندسة الحاسب الآلي</title>
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>
+          <style>
+            @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap');
+            body { font-family: 'IBM Plex Sans Arabic', sans-serif; background: #fff; margin: 0; padding: 20px; color: #24272A; }
+            .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+            .card { border: 1px dashed #3CB8D9; border-radius: 4px; padding: 16px; text-align: center; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+            .header-tag { font-size: 11px; font-weight: 600; color: #61676E; margin-bottom: 2px; }
+            .title { font-size: 14px; font-weight: 700; color: #24272A; margin-bottom: 4px; }
+            .qr-box { padding: 6px; background: #fff; border: 1px solid #DEE2E6; border-radius: 4px; margin: 8px 0; }
+            .notice { font-size: 11px; color: #61676E; line-height: 1.4; max-width: 250px; }
+            .footer-note { font-size: 9px; color: #8C939A; margin-top: 6px; }
+            @media print { .no-print { display: none; } body { padding: 0; } .grid { gap: 10px; } }
+          </style>
+        </head>
+        <body>
+          <div class="no-print" style="margin-bottom: 20px; text-align: center;">
+            <button onclick="window.print()" style="padding: 8px 20px; font-size: 13px; font-weight: bold; background: #3CB8D9; color: #fff; border: none; border-radius: 4px; cursor: pointer;">بدء طباعة البطاقات</button>
+            <p style="font-size: 11px; color: #61676E; margin-top: 6px;">جاهزة للطباعة على ورق A4 ثم القص والتوزيع على مقاعد القاعة.</p>
+          </div>
+          <div class="grid">
+      `);
+
+      keys.forEach((k, idx) => {
+        const chair = currentChairs[k];
+        printWindow.document.write(`
+          <div class="card">
+            <div class="header-tag">جامعة طرابلس · قسم هندسة الحاسب الآلي</div>
+            <div class="title">بطاقة المقعد التفاعلي #${chair.number}</div>
+            <div class="qr-box" id="qr_box_${idx}"></div>
+            <div class="notice">امسح الرمز بواسطة كاميرا هاتفك وأدخل رقم قيدك لتوثيق نقطة إضافية في السجل الأكاديمي.</div>
+            <div class="footer-note">رمز معتمد لمرة واحدة فقط · ملتقى الطلبة الجدد</div>
+          </div>
+        `);
+      });
+
+      printWindow.document.write(`</div><script>`);
+      keys.forEach((k, idx) => {
+        const chair = currentChairs[k];
+        const fullScanUrl = `${siteBase}?chair=${chair.id}&token=${chair.token}`;
+        printWindow.document.write(`
+          new QRCode(document.getElementById("qr_box_${idx}"), { text: "${fullScanUrl}", width: 130, height: 130 });
+        `);
+      });
+      printWindow.document.write(`<\/script></body></html>`);
+      printWindow.document.close();
+    }
+
+    async function deleteParticipant(code) {
+      const res = await DarkSwal.fire({
+        title: 'حذف سجل الطالب؟',
+        text: `سيتم حذف الرمز (${code}) نهائياً من قاعدة البيانات.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'تأكيد الحذف',
+        cancelButtonText: 'إلغاء'
+      });
+      if (res.isConfirmed) {
+        await fetch('/api?action=delete_participant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code })
+        });
+        fetchParticipants();
+        DarkSwal.fire('تم الحذف', 'تم حذف السجل بنجاح.', 'success');
+      }
+    }
+
+    async function resetAllParticipants() {
+      const res = await DarkSwal.fire({
+        title: 'إعادة تعيين السجل بالكامل؟',
+        text: 'سيتم مسح جميع بيانات الحضور للبدء من الصفر.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'تأكيد المسح',
+        cancelButtonText: 'تراجع'
+      });
+      if (res.isConfirmed) {
+        await fetch('/api?action=reset_participants', { method: 'POST' });
+        fetchParticipants();
+        DarkSwal.fire('اكتمل التعيين', 'تمت تصفية السجل بنجاح.', 'success');
+      }
+    }
+
+    async function fetchQuestions() {
+      try {
+        const res = await fetch('/api?action=get_questions');
+        allQuestions = await res.json();
+        const select = document.getElementById('questionSelect');
+        select.innerHTML = '';
+        Object.keys(allQuestions).forEach(id => {
+          const q = allQuestions[id];
+          const opt = document.createElement('option');
+          opt.value = id;
+          opt.innerText = `[${q.duration || 30}ث] ${q.text.substring(0, 40)}...`;
+          select.appendChild(opt);
+        });
+      } catch (e) {}
+    }
+
+    async function deleteSelectedQuestion() {
+      const qId = document.getElementById('questionSelect').value;
+      if (!qId) return DarkSwal.fire('تنبيه', 'لا يوجد سؤال محدد', 'warning');
+      await fetch('/api?action=delete_question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: qId })
+      });
+      fetchQuestions();
+      DarkSwal.fire('تم الحذف', 'تم حذف السؤال بنجاح.', 'success');
+    }
+
+    async function setMode(mode) {
+      await fetch('/api?action=set_mode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode })
+      });
+    }
+
+    async function launchSelectedQuestion() {
+      const qId = document.getElementById('questionSelect').value;
+      if (!qId) return DarkSwal.fire('تنبيه', 'يرجى اختيار سؤال أولاً', 'warning');
+      const q = allQuestions[qId];
+      const duration = parseInt(q.duration) || 30;
+      const expiresAt = Date.now() + (duration * 1000);
+
+      await fetch('/api?action=launch_question', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question_id: qId, duration, expires_at: expiresAt })
+      });
+
+      DarkSwal.fire('تم الإطلاق', `السؤال معروض الآن لمدة ${duration} ثانية.`, 'success');
+    }
+
+    async function triggerFlashBonus() {
+      const sec = parseInt(document.getElementById('bonusDurationInput').value) || 20;
+      const randomCode = 'CE' + Math.floor(100 + Math.random() * 900);
+      await fetch('/api?action=trigger_bonus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bonus_id: randomCode, expires_at: Date.now() + (sec * 1000) })
+      });
+      DarkSwal.fire('تم التفعيل', `الرمز ${randomCode} معروض الآن لمدة ${sec} ثانية.`, 'success');
+    }
+
+    async function prepareRaffleStage() {
+      await fetch('/api?action=prepare_raffle', { method: 'POST' });
+      DarkSwal.fire('شاشة السحب جاهزة', 'تم تحويل شاشة العرض لوضع انتظار إعلان الفائزين.', 'info');
+    }
+
+    async function executeWeightedDraw() {
+      const keys = Object.keys(allParticipants);
+      if (keys.length === 0) return DarkSwal.fire('خطأ', 'لا يوجد طلاب مسجلون.', 'error');
+
+      const requestedCount = parseInt(document.getElementById('winnersCountInput').value) || 1;
+      const winnersCount = Math.min(requestedCount, keys.length);
+
+      let pool = keys.map(k => ({ ...allParticipants[k] }));
+      let selectedWinners = [];
+
+      for (let i = 0; i < winnersCount; i++) {
+        const totalWeight = pool.reduce((sum, p) => sum + Math.max(1, p.score || 1), 0);
+        let randomVal = Math.random() * totalWeight;
+        let cumulative = 0;
+        let chosenIndex = 0;
+
+        for (let j = 0; j < pool.length; j++) {
+          cumulative += Math.max(1, pool[j].score || 1);
+          if (randomVal <= cumulative) { chosenIndex = j; break; }
+        }
+
+        const winner = pool[chosenIndex];
+        selectedWinners.push({ name: winner.name, code: winner.code });
+        pool.splice(chosenIndex, 1);
+      }
+
+      await fetch('/api?action=set_raffle_winners', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ winners: selectedWinners })
+      });
+
+      let winnersHtml = '<div class="text-right space-y-1.5 mt-2 text-xs">';
+      selectedWinners.forEach((w, idx) => {
+        winnersHtml += `<div class="bg-[#F6F8FA] border border-[#DEE2E6] p-2 rounded flex justify-between">
+          <span class="font-bold text-[#24272A]">${idx + 1}. ${w.name}</span>
+          <span class="font-mono text-[#3CB8D9] font-bold">#${w.code}</span>
+        </div>`;
+      });
+      winnersHtml += '</div>';
+
+      DarkSwal.fire({ icon: 'success', title: `تم اعتماد ${selectedWinners.length} فائزين بنجاح`, html: winnersHtml });
+    }
+
+    async function addManualPoint(code) {
+      await fetch('/api?action=add_manual_point', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      fetchParticipants();
+    }
+
+    async function addNewQuestionPrompt() {
+      const { value: formValues } = await DarkSwal.fire({
+        title: 'إضافة سؤال تفاعلي جديد',
+        html:
+          '<div class="space-y-2 text-right">' +
+            '<label class="text-xs text-[#61676E] block">نص السؤال الأكاديمي:</label>' +
+            '<input id="swalQText" class="w-full p-2 bg-[#FAFAFB] border border-[#DEE2E6] rounded text-xs text-[#24272A]">' +
+            '<label class="text-xs text-[#24272A] font-bold block pt-1">مدة السؤال بالثواني:</label>' +
+            '<input id="swalDuration" type="number" value="30" min="5" max="300" class="w-full p-2 bg-[#FAFAFB] border border-[#DEE2E6] rounded text-xs text-[#24272A] font-bold text-center">' +
+            '<label class="text-xs text-[#61676E] block pt-1">خيارات الإجابة الأربعة:</label>' +
+            '<input id="swalOpt1" class="w-full p-1.5 bg-[#FAFAFB] border border-[#DEE2E6] rounded text-xs text-[#24272A] mb-1" placeholder="الخيار الأول">' +
+            '<input id="swalOpt2" class="w-full p-1.5 bg-[#FAFAFB] border border-[#DEE2E6] rounded text-xs text-[#24272A] mb-1" placeholder="الخيار الثاني">' +
+            '<input id="swalOpt3" class="w-full p-1.5 bg-[#FAFAFB] border border-[#DEE2E6] rounded text-xs text-[#24272A] mb-1" placeholder="الخيار الثالث">' +
+            '<input id="swalOpt4" class="w-full p-1.5 bg-[#FAFAFB] border border-[#DEE2E6] rounded text-xs text-[#24272A] mb-2" placeholder="الخيار الرابع">' +
+            '<label class="text-xs text-[#24272A] font-bold block">تحديد الخيار الصحيح:</label>' +
+            '<select id="swalCorrect" class="w-full p-2 bg-[#FAFAFB] border border-[#DEE2E6] rounded text-xs text-[#24272A] font-semibold">' +
+              '<option value="0">الخيار الأول (1) هو الصحيح</option>' +
+              '<option value="1">الخيار الثاني (2) هو الصحيح</option>' +
+              '<option value="2">الخيار الثالث (3) هو الصحيح</option>' +
+              '<option value="3">الخيار الرابع (4) هو الصحيح</option>' +
+            '</select>' +
+          '</div>',
+        focusConfirm: false,
+        confirmButtonText: 'حفظ السؤال',
+        showCancelButton: true,
+        cancelButtonText: 'إلغاء',
+        preConfirm: () => {
+          const q = document.getElementById('swalQText').value.trim();
+          const dur = parseInt(document.getElementById('swalDuration').value) || 30;
+          const o1 = document.getElementById('swalOpt1').value.trim();
+          const o2 = document.getElementById('swalOpt2').value.trim();
+          const o3 = document.getElementById('swalOpt3').value.trim();
+          const o4 = document.getElementById('swalOpt4').value.trim();
+          const correct = parseInt(document.getElementById('swalCorrect').value);
+          if (!q || !o1 || !o2 || !o3 || !o4) {
+            DarkSwal.showValidationMessage('يرجى تعبئة جميع الحقول');
+            return false;
+          }
+          return { q, duration: dur, options: [o1, o2, o3, o4], correct };
+        }
+      });
+
+      if (formValues) {
+        const qId = 'q_' + Date.now();
+        await fetch('/api?action=add_question', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: qId,
+            text: formValues.q,
+            duration: formValues.duration,
+            options: formValues.options,
+            correct: formValues.correct
+          })
+        });
+        fetchQuestions();
+        DarkSwal.fire('تمت الإضافة', 'أُضيف السؤال بنجاح في Turso.', 'success');
+      }
+    }
+
+    function exportToCSV() {
+      const keys = Object.keys(allParticipants);
+      if (keys.length === 0) return;
+      let csv = "\uFEFFالكود,الاسم,رقم القيد,معرف التيليجرام,النقاط\n";
+      keys.forEach(k => {
+        const p = allParticipants[k];
+        csv += `"${p.code}","${p.name}","${p.student_id}","${p.telegram || ''}","${p.score || 0}"\n`;
+      });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+      link.download = `ce_orientation_results.csv`;
+      link.click();
+    }
+  </script>
+</body>
+</html>
