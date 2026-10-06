@@ -6,6 +6,7 @@ const db = createClient({
 });
 
 export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -36,7 +37,7 @@ export default async function handler(req, res) {
 
     if (action === 'launch_question') {
       await db.execute({
-        sql: 'UPDATE system_state SET current_mode = "QUESTION", active_question_id = ?, question_duration = ?, question_expires_at = ? WHERE id = 1',
+        sql: 'UPDATE system_state SET current_mode = \'QUESTION\', active_question_id = ?, question_duration = ?, question_expires_at = ? WHERE id = 1',
         args: [body.question_id, body.duration, body.expires_at]
       });
       return res.status(200).json({ success: true });
@@ -44,20 +45,20 @@ export default async function handler(req, res) {
 
     if (action === 'trigger_bonus') {
       await db.execute({
-        sql: 'UPDATE system_state SET current_mode = "FLASH_BONUS", active_bonus_id = ?, bonus_expires_at = ? WHERE id = 1',
+        sql: 'UPDATE system_state SET current_mode = \'FLASH_BONUS\', active_bonus_id = ?, bonus_expires_at = ? WHERE id = 1',
         args: [body.bonus_id, body.expires_at]
       });
       return res.status(200).json({ success: true });
     }
 
     if (action === 'prepare_raffle') {
-      await db.execute('UPDATE system_state SET current_mode = "RAFFLE", raffle_winners = NULL WHERE id = 1');
+      await db.execute('UPDATE system_state SET current_mode = \'RAFFLE\', raffle_winners = NULL WHERE id = 1');
       return res.status(200).json({ success: true });
     }
 
     if (action === 'set_raffle_winners') {
       await db.execute({
-        sql: 'UPDATE system_state SET current_mode = "RAFFLE", raffle_winners = ? WHERE id = 1',
+        sql: 'UPDATE system_state SET current_mode = \'RAFFLE\', raffle_winners = ? WHERE id = 1',
         args: [JSON.stringify(body.winners)]
       });
       return res.status(200).json({ success: true });
