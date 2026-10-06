@@ -347,8 +347,12 @@
 
     function renderRaffleResult(state) {
       const box = document.getElementById('raffleResult');
+      const rState = document.getElementById('raffleState');
+      const idle = document.getElementById('idleState');
       const ar = currentLang === 'ar';
       const winners = Array.isArray(state.raffle_winners) ? state.raffle_winners : [];
+      const announcedAt = Number(state.raffle_announced_at || 0);
+      const registeredAt = Number(currentStudentData && currentStudentData.registered_at || 0);
       let kind, html;
 
       if (winners.length === 0) {
@@ -359,6 +363,10 @@
             <h3 class="text-xs font-bold text-[#24272A]">${ar ? 'جارٍ إجراء السحب...' : 'The raffle is in progress...'}</h3>
             <p class="text-[11px] text-[#61676E]">${ar ? 'ستظهر النتيجة هنا فور اعتمادها. تابع شاشة العرض.' : 'Your result will appear here as soon as it is announced.'}</p>
           </div>`;
+      } else if (!announcedAt || registeredAt > announcedAt) {
+        rState.classList.add('hidden');
+        idle.classList.remove('hidden');
+        return;
       } else if (winners.some(w => String(w.code) === String(myStudentCode))) {
         kind = 'win';
         html = `
