@@ -52,14 +52,14 @@ export default async function handler(req, res) {
     }
 
     if (action === 'prepare_raffle') {
-      await db.execute('UPDATE system_state SET current_mode = \'RAFFLE\', raffle_winners = NULL WHERE id = 1');
+      await db.execute('UPDATE system_state SET current_mode = \'RAFFLE\', raffle_winners = NULL, raffle_announced_at = NULL WHERE id = 1');
       return res.status(200).json({ success: true });
     }
 
     if (action === 'set_raffle_winners') {
       await db.execute({
-        sql: 'UPDATE system_state SET current_mode = \'RAFFLE\', raffle_winners = ? WHERE id = 1',
-        args: [JSON.stringify(body.winners)]
+        sql: 'UPDATE system_state SET current_mode = \'RAFFLE\', raffle_winners = ?, raffle_announced_at = ? WHERE id = 1',
+        args: [JSON.stringify(body.winners), Date.now()]
       });
       return res.status(200).json({ success: true });
     }
