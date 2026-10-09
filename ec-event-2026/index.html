@@ -26,6 +26,18 @@
       color: #3A3D40 !important;
       box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05) !important;
     }
+    @keyframes breathe {
+      0%, 100% { transform: scale(0.65); opacity: 0.55; }
+      50% { transform: scale(1); opacity: 1; }
+    }
+    .wait-dot { animation: breathe 1.8s ease-in-out infinite; }
+    @keyframes blink3 {
+      0%, 80%, 100% { opacity: 0.15; }
+      40% { opacity: 1; }
+    }
+    .wd { display: inline-block; animation: blink3 1.4s infinite; }
+    .wd:nth-child(2) { animation-delay: 0.2s; }
+    .wd:nth-child(3) { animation-delay: 0.4s; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-3 md:p-6">
@@ -144,11 +156,17 @@
       </div>
 
       <div id="interactionBox" class="bg-white border border-[#DEE2E6] rounded p-4 shadow-sm min-h-[160px] flex flex-col justify-center text-center">
-        <div id="idleState" class="space-y-2 py-3">
-          <div class="w-2.5 h-2.5 rounded-full bg-[#3CB8D9] mx-auto animate-ping"></div>
-          <h3 class="text-xs font-bold text-[#24272A]" data-i18n="idleTitle">الجلسة متصلة بالقاعة</h3>
+        <div id="idleState" class="space-y-3 py-4">
+          <div class="relative w-4 h-4 mx-auto">
+            <span class="absolute inset-0 rounded-full bg-[#3CB8D9] opacity-50 animate-ping"></span>
+            <span class="absolute rounded-full bg-[#3CB8D9] wait-dot" style="inset:3px"></span>
+          </div>
+          <div class="flex items-center justify-center gap-1.5">
+            <h3 class="text-xs font-bold text-[#24272A]" data-i18n="idleTitle">بانتظار السؤال القادم</h3>
+            <span class="text-[#3CB8D9] font-bold text-xs"><span class="wd">.</span><span class="wd">.</span><span class="wd">.</span></span>
+          </div>
           <p class="text-[11px] text-[#61676E] max-w-xs mx-auto leading-relaxed" data-i18n="idleDesc">
-            تابع شاشة العرض الرئيسية. ستظهر الأسئلة والرموز التفاعلية هنا مباشرة.
+            ابقَ على هذه الصفحة، ستظهر الأسئلة والرموز التفاعلية هنا فور إطلاقها.
           </p>
         </div>
 
@@ -216,8 +234,8 @@
         guide3: "<b>السحب الختامي الموزون:</b> كل نقطة تجمعها تعادل فرصة إضافية، وتزيد حظوظك في الفوز بالقرعة الإلكترونية.",
         alreadyReg: "مسجل مسبقاً من جهاز آخر؟", restoreLink: "استعادة الجلسة بالرمز أو القيد",
         participantTitle: "بيانات المشارك", pointsTitle: "رصيد النقاط", codeTitle: "الرمز التعريفي المخصص لك",
-        codeNote: "محفوظ بجهازك الحالي ومربوط بجميع مشاركاتك", idleTitle: "الجلسة متصلة بالقاعة",
-        idleDesc: "تابع شاشة العرض الرئيسية. ستظهر الأسئلة والرموز التفاعلية هنا مباشرة.",
+        codeNote: "محفوظ بجهازك الحالي ومربوط بجميع مشاركاتك", idleTitle: "بانتظار السؤال القادم",
+        idleDesc: "ابقَ على هذه الصفحة، ستظهر الأسئلة والرموز التفاعلية هنا فور إطلاقها.",
         qBadge: "سؤال تفاعلي", qPoint: "+1 نقطة", bonusBadge: "رمز السرعة التفاعلي",
         bonusTitle: "امسح الرمز الظاهر على شاشة العرض", bonusDesc: "يتم احتساب النقطة الإضافية لحسابك تلقائياً بمجرد مسح الكود.",
         syncHelpTitle: "هل واجهت تأخراً أو علقت الشاشة؟", syncHelpDesc: "اضغط تحديث لإعادة المزامنة، أو سجل خروجك لتبديل الحساب.",
@@ -235,8 +253,8 @@
         guide3: "<b>Weighted Raffle Draw:</b> Each collected point equals an extra ticket, multiplying your chances in the live draw.",
         alreadyReg: "Already registered on another device?", restoreLink: "Restore session via code or ID",
         participantTitle: "Participant Profile", pointsTitle: "Score", codeTitle: "Your Identification Code",
-        codeNote: "Saved to this device and attached to all your answers", idleTitle: "Session Connected to Stage",
-        idleDesc: "Follow the main stage display. Questions and flash codes will appear here in real time.",
+        codeNote: "Saved to this device and attached to all your answers", idleTitle: "Waiting for the next question",
+        idleDesc: "Stay on this page. Questions and flash codes will appear here as soon as they go live.",
         qBadge: "Interactive Question", qPoint: "+1 Point", bonusBadge: "Flash Speed Code",
         bonusTitle: "Scan the code displayed on stage", bonusDesc: "The bonus point is added to your account automatically upon scanning.",
         syncHelpTitle: "Experiencing delay or stuck screen?", syncHelpDesc: "Click reload to re-sync, or log out to switch your account.",
@@ -330,10 +348,16 @@
         rState.classList.add('hidden');
         if (studentQTimerInterval) clearInterval(studentQTimerInterval);
 
-        if (state.current_mode === 'QUESTION' && state.active_question_id) {
+        const questionIsLive = state.current_mode === 'QUESTION'
+          && state.active_question_id
+          && Date.now() < Number(state.question_expires_at || 0);
+
+        if (!questionIsLive) lastActiveQuestionId = null;
+
+        if (questionIsLive) {
           qState.classList.remove('hidden');
           loadQuestionForStudent(state);
-        } else if (state.current_mode === 'FLASH_BONUS') {
+        } else if (state.current_mode === 'FLASH_BONUS' && Date.now() < Number(state.bonus_expires_at || 0)) {
           bState.classList.remove('hidden');
           if (scannedBonus) executeInstantBonusClaim(myStudentCode, scannedBonus);
         } else if (state.current_mode === 'RAFFLE') {
@@ -398,8 +422,7 @@
         document.getElementById('studentQTimer').innerText = `${remaining}s`;
         if (remaining <= 0) {
           clearInterval(studentQTimerInterval);
-          document.getElementById('studentQText').innerText = i18n[currentLang].qExpired;
-          document.getElementById('optionsContainer').innerHTML = '';
+          syncStudentLive();
         }
       };
       updateStudentTimer();
@@ -422,6 +445,7 @@
       document.getElementById('studentQText').innerText = qData.text;
       const container = document.getElementById('optionsContainer');
       container.innerHTML = '';
+      container.style.pointerEvents = 'auto';
 
       qData.options.forEach((opt, idx) => {
         const btn = document.createElement('button');
