@@ -38,6 +38,14 @@
     .wd { display: inline-block; animation: blink3 1.4s infinite; }
     .wd:nth-child(2) { animation-delay: 0.2s; }
     .wd:nth-child(3) { animation-delay: 0.4s; }
+
+    #dashboardSection:not(.hidden) {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1 1 auto;
+    }
+    #interactionBox { flex: 1 1 auto; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-3 md:p-6">
@@ -57,9 +65,9 @@
     </div>
   </header>
 
-  <main class="max-w-md w-full mx-auto my-auto">
+  <main class="max-w-md w-full mx-auto flex-1 flex flex-col">
 
-    <div id="registerSection" class="bg-white border border-[#DEE2E6] rounded p-6 shadow-sm space-y-5">
+    <div id="registerSection" class="bg-white border border-[#DEE2E6] rounded p-6 shadow-sm space-y-5 my-auto">
       <div class="text-center">
         <h1 class="text-xl font-bold text-[#24272A]" data-i18n="mainTitle">سجّل بياناتك وابدأ التفاعل</h1>
         <p class="text-xs text-[#61676E] mt-1" data-i18n="subTitle">ملتقى الطلبة الجدد · قسم هندسة الحاسب الآلي</p>
@@ -134,7 +142,7 @@
       </div>
     </div>
 
-    <div id="dashboardSection" class="hidden space-y-3">
+    <div id="dashboardSection" class="hidden">
       <div class="bg-white border border-[#DEE2E6] rounded p-4 shadow-sm">
         <div class="flex justify-between items-start border-b border-[#DEE2E6] pb-3 mb-3">
           <div>
